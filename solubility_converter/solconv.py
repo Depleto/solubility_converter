@@ -14,9 +14,9 @@ Please make sure csv file is in the script folder, or provide the full path to t
 
 # Grab data
 
-data = pd.read_csv("reaxysleft2.csv")
+data = pd.read_csv("test2.csv")
 
-exp_sol = data["comment"]  # column with experimental sol
+exp_sol = data["Experimental Kow Reference"]  # column with experimental sol
 mol_mass = data["Molar Mass"] # column with molar mass
 conv_sol = data["Experimental Solubility in Water (mg/L)"] # column for converted sol
 
@@ -47,18 +47,22 @@ for i,sol in enumerate(exp_sol):
         conv_sol[i] = converted_num
 
     elif "part" in sol:
-        splitsol = sol.split("in")
-        for string in splitsol:
-            if "solvent" in string:
-                n1 = re.findall(real, string)
-                Y = float(n1[0][0])
+        if "ca." in sol:
+            pass
+        else:
+
+            splitsol = sol.split("in")
+            for string in splitsol:
+                if "solvent" in string:
+                    n1 = re.findall(real, string)
+                    Y = float(n1[0][0])
 
 
-            elif "substance" in string:
-                n2 = re.findall(real,string)
-                X = float(n2[0][0])
+                elif "substance" in string:
+                    n2 = re.findall(real,string)
+                    X = float(n2[0][0])
 
-        conv_sol[i] = ( (X / Y) * 1e6)
+            conv_sol[i] = ( (X / Y) * 1e6)
 
     elif "g/kg" in sol:
         nums = re.findall(real, sol)
@@ -73,13 +77,13 @@ for i,sol in enumerate(exp_sol):
     elif "p(" in sol:
         solsplit = sol.split("p(")
         for string in solsplit:
-            if "olubility" in string:
+            if "solution" in string:
                 num = re.findall(real, string)
-                X = float(num[0][0])
+                Y = float(num[0][0])
 
             else:
                 num = re.findall(real, string)
-                Y = float(num[0][0])
+                X = float(num[0][0])
         conv_sol[i] = (X/Y)*1e6
 
     elif "mol/kg" in sol:
@@ -105,14 +109,86 @@ for i,sol in enumerate(exp_sol):
 
         conv_sol[i] = (X / Y) * mol_mass[i] * 1e6
 
+    elif "mol" in sol and sol.count("mol") == 2:
+        num = re.findall(real, sol)
+        X = float(num[0][0])
+        Y = float(num[1][0])
+
+        conv_sol[i] = (X / Y) * 55556 * mol_mass[i]
+
+    elif "Mol" in sol:
+        solsplit = sol.split("dissolves")
+        for string in solsplit:
+            if "solvent" in string:
+                num = re.findall(real,string)
+                Y = float(num[0][0])
+            elif "ubstance" in string:
+                num = re.findall(real, string)
+                X = float(num[0][0])
+        conv_sol[i] = (X / Y) * mol_mass[i] * 1e6
+
+    elif "g solvent" in sol or "kg solvent" in sol or ("g/" in sol and sol.count("g") >=2):
+
+
+
+        if "ubstance" in sol:
+
+            density_needed = False
+
+
+            solsplit = sol.split("dissolves")
+
+            for string in solsplit:
+
+                if "solvent" in string:
+
+                    num = re.findall(real, string)
+
+                    Y = float(num[0][0])
+
+                    if "kg" in string:
+                        Y *= 1000
+
+                    elif "mg" in string:
+                        Y /= 1000
 
 
 
 
 
+                elif "ubstance" in string:
+
+                    num = re.findall(real, string)
+
+                    X = float(num[0][0])
+
+                    if "kg" in string:
+                        X *= 1000
+
+                    elif "mg" in string:
+                        X /= 1000
+
+                    elif "ml" in string:
+                        density_needed = True
+
+            if density_needed == True:
+                pass
+            else:
+                conv_sol[i] = (X / Y) * 1e6
 
 
-print(conv_sol[329])
+        else:
+
+            num = re.findall(real,sol)
+            X = float(num[0][0])
+            Y = float(num[1][0])
+
+
+            conv_sol[i] = (X / Y) * 1e6
+
+
+
+data.to_csv("test2solved.csv")
 
 
 
