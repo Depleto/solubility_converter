@@ -65,13 +65,54 @@ for i,sol in enumerate(exp_sol):
         X = float(nums[0][0])
         conv_sol[i] = X * 1e3
 
+    elif "mug/ml" in sol:
+        num = re.findall(real, sol)
+        X = float(num[0][0])
+        conv_sol[i] = X
+
+    elif "p(" in sol:
+        solsplit = sol.split("p(")
+        for string in solsplit:
+            if "olubility" in string:
+                num = re.findall(real, string)
+                X = float(num[0][0])
+
+            else:
+                num = re.findall(real, string)
+                Y = float(num[0][0])
+        conv_sol[i] = (X/Y)*1e6
+
+    elif "mol/kg" in sol:
+        num = re.findall(real, sol)
+        X = float(num[0][0])
+        conv_sol[i] = X * mol_mass[i] * 1e3
+
+    elif "mumol/l" in sol:
+        num = re.findall(real,sol)
+        X = float(num[0][0])
+        conv_sol[i] = (X * mol_mass[i]) / 1e3
+
+    elif "mol/" in sol and "g" in sol:
+        solsplit = sol.split("/")
+        for string in solsplit:
+            if "mol" in string:
+                num = re.findall(real,string)
+                X = float(num[0][0])
+
+            elif "g" in string:
+                num = re.findall(real,string)
+                Y = float(num[0][0])
+
+        conv_sol[i] = (X / Y) * mol_mass[i] * 1e6
 
 
 
 
 
 
-print(conv_sol[25])
+
+
+print(conv_sol[329])
 
 
 
